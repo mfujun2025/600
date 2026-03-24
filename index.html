@@ -259,24 +259,24 @@
     <div class="container">
       <h2 class="section-title">全国核心城市分站</h2>
       <div class="city-list">
-        <!-- 关键修改：所有城市链接前加 /600/ -->
-        <a href="/600/beijing">北京400电话办理</a>
-        <a href="/600/shanghai">上海400电话办理</a>
-        <a href="/600/guangzhou">广州400电话办理</a>
-        <a href="/600/shenzhen">深圳400电话办理</a>
-        <a href="/600/tianjin">天津400电话办理</a>
-        <a href="/600/chongqing">重庆400电话办理</a>
-        <a href="/600/chengdu">成都400电话办理</a>
-        <a href="/600/hangzhou">杭州400电话办理</a>
-        <a href="/600/wuhan">武汉400电话办理</a>
-        <a href="/600/xian">西安400电话办理</a>
-        <a href="/600/nanjing">南京400电话办理</a>
-        <a href="/600/suzhou">苏州400电话办理</a>
-        <a href="/600/zhengzhou">郑州400电话办理</a>
-        <a href="/600/jinan">济南400电话办理</a>
-        <a href="/600/qingdao">青岛400电话办理</a>
-        <a href="/600/shijiazhuang">石家庄400电话办理</a>
-        <a href="/600/baoding">保定400电话办理</a>
+        <!-- 城市链接：带参数指向首页 -->
+        <a href="/600/?city=beijing">北京400电话办理</a>
+        <a href="/600/?city=shanghai">上海400电话办理</a>
+        <a href="/600/?city=guangzhou">广州400电话办理</a>
+        <a href="/600/?city=shenzhen">深圳400电话办理</a>
+        <a href="/600/?city=tianjin">天津400电话办理</a>
+        <a href="/600/?city=chongqing">重庆400电话办理</a>
+        <a href="/600/?city=chengdu">成都400电话办理</a>
+        <a href="/600/?city=hangzhou">杭州400电话办理</a>
+        <a href="/600/?city=wuhan">武汉400电话办理</a>
+        <a href="/600/?city=xian">西安400电话办理</a>
+        <a href="/600/?city=nanjing">南京400电话办理</a>
+        <a href="/600/?city=suzhou">苏州400电话办理</a>
+        <a href="/600/?city=zhengzhou">郑州400电话办理</a>
+        <a href="/600/?city=jinan">济南400电话办理</a>
+        <a href="/600/?city=qingdao">青岛400电话办理</a>
+        <a href="/600/?city=shijiazhuang">石家庄400电话办理</a>
+        <a href="/600/?city=baoding">保定400电话办理</a>
       </div>
     </div>
   </section>
@@ -342,39 +342,28 @@
       "baoding": "保定", "yingkou": "营口", "yancheng": "盐城", "foshan": "佛山",
       "dongguan": "东莞", "wuxi": "无锡", "changzhou": "常州", "ningbo": "宁波"
     };
-    // 关键修改：解析 /600/城市拼音 路径
-    const fullPath = window.location.pathname;
-    const pathParts = fullPath.split('/').filter(part => part); // 拆分路径，过滤空值
-    const cityPath = pathParts.length >= 2 ? pathParts[1] : ''; // 取 /600/ 后的城市拼音（如 /600/tianjin → tianjin）
-    
-    // 匹配城市，替换页面内容
-    if (cityPath && cityMap[cityPath]) {
-      const cityName = cityMap[cityPath];
+
+    // 解析URL参数（核心函数）
+    function getUrlParam(name) {
+      const reg = new RegExp(`(^|&)${name}=([^&]*)(&|$)`);
+      const r = window.location.search.substr(1).match(reg);
+      return r ? decodeURIComponent(r[2]) : '';
+    }
+    const cityParam = getUrlParam('city');
+
+    // 强制显示对应城市内容（无IP跳转干扰）
+    if (cityParam && cityMap[cityParam]) {
+      const cityName = cityMap[cityParam];
+      // 替换标题
       document.querySelector('.city-title').textContent = `${cityName}400电话办理 - 企业专属400号码申请 | 当天开通`;
+      // 替换关键词
       document.querySelector('.city-keywords').content = `${cityName}400电话办理,${cityName}400号码申请,${cityName}企业400电话`;
+      // 替换描述
       document.querySelector('.city-desc').content = `${cityName}400电话办理平台，三大运营商正规号码，无月租、当天开通、通话录音免费，${cityName}企业均可办理！`;
+      // 替换主标题
       document.querySelector('.city-name').textContent = `${cityName}400电话办理 - 企业专属号码申请`;
     }
-    // IP定位自动跳转 /600/城市拼音
-    async function getCurrentCity() {
-      if (cityPath) return; // 已有城市路径，不跳转
-      try {
-        const res = await fetch('https://pv.sohu.com/cityjson?ie=utf-8');
-        const text = await res.text();
-        const data = JSON.parse(text.replace('var returnCitySN = ','').replace(';',''));
-        const city = data.cname.replace('市','').replace('省','').toLowerCase();
-        for (const [pinyin, name] of Object.entries(cityMap)) {
-          if (city.includes(pinyin) || name.includes(data.cname.replace('市',''))) {
-            window.location.href = `/600/${pinyin}`; // 关键：跳转路径加 /600/
-            break;
-          }
-        }
-      } catch(e) {
-        console.log('IP定位失败，停留在 /600/ 首页');
-      }
-    }
-    // 执行定位
-    getCurrentCity();
+    // 完全删除IP定位跳转逻辑，避免覆盖参数
   </script>
 </body>
 </html>
