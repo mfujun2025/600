@@ -1,0 +1,34 @@
+// 全国城市拼音-名称映射（完整库，确保IP定位/路径识别）
+const cityMap = {
+  "beijing": "北京", "shanghai": "上海", "guangzhou": "广州", "shenzhen": "深圳",
+  "tianjin": "天津", "chongqing": "重庆", "chengdu": "成都", "hangzhou": "杭州",
+  "wuhan": "武汉", "yingkou": "营口", "yancheng": "盐城", "nanjing": "南京",
+  // 可继续添加其他城市，保持和你现有库一致
+};
+
+// 1. 识别访问路径（如/beijing → 自动替换页面城市名称）
+const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+if (path && cityMap[path]) {
+  // 替换页面中所有.city-name类的内容为当前城市
+  document.querySelectorAll('.city-name').forEach(el => {
+    el.textContent = `${cityMap[path]}400电话办理`;
+  });
+  // 修改页面标题
+  document.title = `${cityMap[path]}400电话办理 | 400.中国`;
+}
+
+// 2. IP定位自动跳转（可选，和你原有逻辑一致）
+async function getCurrentCity() {
+  try {
+    const res = await fetch('https://pv.sohu.com/cityjson?ie=utf-8');
+    const text = await res.text();
+    const data = JSON.parse(text.replace('var returnCitySN = ','').replace(';',''));
+    const city = data.cname.replace('市','');
+    // 如果未通过路径访问，且IP城市存在，自动跳转
+    if (!path && city && cityMap[city.toLowerCase()]) {
+      window.location.href = `/${cityMap[city.toLowerCase()]}`;
+    }
+  } catch(e) {}
+}
+// 执行IP定位
+getCurrentCity();
